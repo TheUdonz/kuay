@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest2A | Created by TheUdonz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- วาง Firebase Config ของคุณตรงนี้ ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // ------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.auth = auth; window.db = db; window.provider = provider;
+        window.signIn = () => signInWithPopup(auth, provider);
+        window.logout = () => signOut(auth);
+    </script>
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #030305; color: white; }
+        .neon-blue { text-shadow: 0 0 15px #00d2ff; color: #00d2ff; }
+        .neon-card { background: rgba(10, 10, 18, 0.95); border: 1px solid rgba(0, 210, 255, 0.1); }
+        .progress-bar { transition: width 0.6s ease; }
+        .tab-active { color: #00d2ff; border-bottom: 3px solid #00d2ff; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #00d2ff; border-radius: 10px; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- Navbar & Auth -->
+    <nav class="p-4 border-b border-white/5 flex justify-between items-center bg-black/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex flex-col">
+            <h1 class="text-xl font-black neon-blue italic tracking-tighter">QUEST 2A</h1>
+            <span class="text-[8px] text-gray-500 font-bold uppercase">Created by TheUdonz</span>
+        </div>
+        <div id="auth-section">
+            <button onclick="signIn()" class="bg-blue-600 px-4 py-2 rounded-lg font-bold text-sm">LOGIN WITH GOOGLE</button>
+        </div>
+    </nav>
+
+    <!-- Global Progress Bar -->
+    <div class="max-w-2xl mx-auto p-6 mt-4">
+        <div class="flex justify-between items-end mb-2">
+            <span class="text-xs font-bold text-gray-500 uppercase">Global Level 400</span>
+            <span id="global-lv" class="text-5xl font-black neon-blue">1</span>
+        </div>
+        <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+            <div id="global-progress" class="bg-cyan-500 h-full progress-bar" style="width: 0.25%"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-2xl mx-auto p-4 space-y-6">
+        
+        <!-- Tabs -->
+        <div class="flex justify-around border-b border-white/5 text-gray-500 font-black text-sm mb-4">
+            <button onclick="showPage('dash')" id="tab-dash" class="pb-3 tab-active">DASHBOARD</button>
+            <button onclick="showPage('quest')" id="tab-quest" class="pb-3">LOG</button>
+            <button onclick="showPage('timer')" id="tab-timer" class="pb-3">TIMER</button>
+            <button onclick="showPage('leader')" id="tab-leader" class="pb-3">RANKING</button>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="page-dash" class="space-y-4">
+            <div id="subject-cards" class="grid grid-cols-2 gap-4"></div>
+            <div class="neon-card p-6 rounded-3xl mt-4">
+                <div class="flex justify-between text-xs font-bold mb-2">
+                    <span class="text-yellow-500 uppercase">Century Gauge</span>
+                    <span id="century-label">0/100H</span>
+                </div>
+                <div class="w-full bg-black h-4 rounded-full border border-white/5 overflow-hidden p-0.5">
+                    <div id="century-bar" class="bg-yellow-500 h-full rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+            <button onclick="showLazyQuote()" class="w-full py-6 bg-red-600/10 border border-red-600/50 rounded-2xl text-red-500 font-black hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest">I'm Lazy Today...</button>
+        </div>
+
+        <!-- Leaderboard Page -->
+        <div id="page-leader" class="hidden neon-card p-6 rounded-3xl">
+            <h2 class="text-xl font-black mb-6 neon-blue uppercase italic">Top 10 Legends</h2>
+            <div id="leaderboard-list" class="space-y-3">
+                <p class="text-gray-500 animate-pulse">Loading rankings...</p>
+            </div>
+        </div>
+
+        <!-- Quest Log & Timer (ย่อส่วนจาก v3.0 มาใส่ในนี้) -->
+        <div id="page-quest" class="hidden space-y-4">
+            <div class="neon-card p-6 rounded-3xl space-y-4">
+                <select id="input-subject" class="w-full bg-gray-900 p-4 rounded-xl border-white/5">
+                    <option value="phy">Physics</option><option value="chem">Chemistry</option>
+                    <option value="bio">Biology</option><option value="math">Math</option>
+                </select>
+                <input type="number" id="input-xp" class="w-full bg-gray-900 p-4 rounded-xl border-white/5" placeholder="XP Amount" value="100">
+                <button onclick="addXPManual()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Earn XP</button>
+            </div>
+        </div>
+
+        <div id="page-timer" class="hidden text-center py-10 space-y-8">
+            <div id="timer-display" class="text-9xl font-black tracking-tighter">25:00</div>
+            <button id="timer-btn" onclick="toggleTimer()" class="bg-white text-black font-black px-16 py-4 rounded-full text-xl shadow-xl">START</button>
+        </div>
+
+    </main>
+
+    <!-- Modal คำคม -->
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-6 z-[100] backdrop-blur-md">
+        <div class="text-center max-w-md">
+            <h1 class="text-5xl font-black text-red-600 mb-6 italic">WAKE UP!</h1>
+            <p id="modal-quote" class="text-xl font-bold text-white mb-8 leading-relaxed italic">"..."</p>
+            <button onclick="closeModal()" class="bg-white text-black font-black px-10 py-3 rounded-full">OK, I'LL GO STUDY</button>
+        </div>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-[10px] text-gray-600 bg-black/80">
+        POWERED BY QUEST2A ENGINE | <span class="text-gray-400 font-bold uppercase tracking-widest">Created by TheUdonz</span>
+    </footer>
+
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let stats = {
+            subjects: { phy: {lv:1, xp:0}, chem: {lv:1, xp:0}, bio: {lv:1, xp:0}, math: {lv:1, xp:0} },
+            totalHours: 0,
+            userName: "Guest",
+            photo: ""
+        };
+
+        let currentUser = null;
+
+        onAuthStateChanged(window.auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-section').innerHTML = `<button onclick="logout()" class="text-xs text-red-500 font-bold">LOGOUT: ${user.displayName.split(' ')[0]}</button>`;
+                // Load from Cloud
+                const docRef = doc(window.db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    stats = { ...stats, ...docSnap.data() };
+                } else {
+                    stats.userName = user.displayName;
+                    stats.photo = user.photoURL;
+                }
+                saveAndRefresh();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-section').innerHTML = `<button onclick="signIn()" class="bg-blue-600 px-4 py-2 rounded-lg font-bold text-sm">LOGIN WITH GOOGLE</button>`;
+            }
+        });
+
+        window.saveAndRefresh = async () => {
+            if (currentUser) {
+                const totalLv = Object.values(stats.subjects).reduce((acc, curr) => acc + curr.lv, 0);
+                await setDoc(doc(window.db, "users", currentUser.uid), {
+                    ...stats,
+                    globalLevel: totalLv,
+                    lastUpdated: Date.now()
+                });
+            }
+            renderDashboard();
+        };
+
+        window.renderDashboard = () => {
+            const container = document.getElementById('subject-cards');
+            container.innerHTML = '';
+            let totalLv = 0;
+            const subjs = stats.subjects;
+            Object.keys(subjs).forEach(k => {
+                totalLv += subjs[k].lv;
+                const reqXP = subjs[k].lv * 100;
+                container.innerHTML += `
+                    <div class="neon-card p-4 rounded-2xl">
+                        <div class="flex justify-between text-[10px] mb-1 font-bold text-gray-500 uppercase"><span>${k}</span><span>LV. ${subjs[k].lv}</span></div>
+                        <div class="w-full bg-black h-1 rounded-full overflow-hidden"><div class="bg-cyan-500 h-full" style="width: ${(subjs[k].xp/reqXP)*100}%"></div></div>
+                    </div>
+                `;
+            });
+            document.getElementById('global-lv').innerText = totalLv;
+            document.getElementById('global-progress').style.width = `${(totalLv / 400) * 100}%`;
+            document.getElementById('century-bar').style.width = `${stats.totalHours}%`;
+            document.getElementById('century-label').innerText = `${stats.totalHours.toFixed(1)}/100H`;
+        };
+
+        window.fetchLeaderboard = async () => {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '<p class="text-center text-xs py-4">Flipping the cards...</p>';
+            const q = query(collection(window.db, "users"), orderBy("globalLevel", "desc"), limit(10));
+            const querySnapshot = await getDocs(q);
+            list.innerHTML = '';
+            let rank = 1;
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                list.innerHTML += `
+                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <span class="font-black text-gray-600">#${rank++}</span>
+                            <img src="${data.photo || 'https://via.placeholder.com/40'}" class="w-8 h-8 rounded-full border border-cyan-500/50">
+                            <span class="font-bold text-sm">${data.userName}</span>
+                        </div>
+                        <span class="neon-blue font-black text-lg">LV. ${data.globalLevel}</span>
+                    </div>
+                `;
+            });
+        };
+
+        window.addXPManual = () => {
+            const subj = document.getElementById('input-subject').value;
+            const xp = parseInt(document.getElementById('input-xp').value) || 0;
+            let s = stats.subjects[subj];
+            s.xp += xp;
+            while(s.xp >= s.lv * 100 && s.lv < 100) { s.xp -= s.lv * 100; s.lv++; }
+            window.saveAndRefresh();
+            alert(`Level Up! Current ${subj} LV: ${s.lv}`);
+        };
+
+        window.showPage = (p) => {
+            document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(`page-${p}`).classList.remove('hidden');
+            document.querySelectorAll('.pb-3').forEach(t => t.classList.remove('tab-active'));
+            document.getElementById(`tab-${p}`).classList.add('tab-active');
+            if(p === 'leader') window.fetchLeaderboard();
+        };
+
+        window.showLazyQuote = () => {
+            const quotes = ["เหนื่อยก็ไปนอน แต่อย่ามาร้องไห้ตอนเห็นคะแนนคนอื่นแล้วกัน", "คู่แข่งคุณกำลังขยับ แต่คุณกำลังขยับนิ้วไถหน้าจอ?", "พ่อแม่ส่งมาเรียน ไม่ได้ส่งมาให้เป็นภาระของความฝันตัวเอง ลุก!"];
+            document.getElementById('modal-quote').innerText = quotes[Math.floor(Math.random()*quotes.length)];
+            document.getElementById('modal').classList.remove('hidden');
+        };
+        window.closeModal = () => document.getElementById('modal').classList.add('hidden');
+
+        let timer; let timeLeft = 25*60;
+        window.toggleTimer = () => {
+            if(timer) { clearInterval(timer); timer = null; document.getElementById('timer-btn').innerText = "START"; }
+            else {
+                document.getElementById('timer-btn').innerText = "PAUSE";
+                timer = setInterval(() => {
+                    if(timeLeft > 0) {
+                        timeLeft--;
+                        let m = Math.floor(timeLeft/60); let s = timeLeft%60;
+                        document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+                    } else {
+                        clearInterval(timer);
+                        stats.totalHours += 0.42; 
+                        if(stats.totalHours >= 100) { stats.totalHours = 0; Object.keys(stats.subjects).forEach(k => stats.subjects[k].xp += 500); }
+                        window.saveAndRefresh();
+                        alert("Great Session!");
+                    }
+                }, 1000);
+            }
+        };
+    </script>
+</body>
+</html>
