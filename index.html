@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quest2A | Created by TheUdonz</title>
+    <title>Quest2A | Final Fix v6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
-        :root { --p-blue: #00d2ff; }
         body { font-family: 'Kanit', sans-serif; background-color: #050508; color: white; margin: 0; }
-        .glass { background: rgba(15, 15, 25, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .neon-blue { text-shadow: 0 0 15px var(--p-blue); color: var(--p-blue); }
-        .tab-active { color: var(--p-blue); border-bottom: 3px solid var(--p-blue); }
-        .card-subj { background: #11111a; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; }
-        input, select { background: #1a1a2e; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; }
+        .glass { background: rgba(20, 20, 30, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .neon-blue { text-shadow: 0 0 15px #00d2ff; color: #00d2ff; }
+        .tab-active { color: #00d2ff; border-bottom: 3px solid #00d2ff; font-weight: 900; }
+        .card-subj { background: #11111a; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; }
+        input, select { background: #1a1a2e; border: 1px solid #333; color: white; padding: 10px; border-radius: 10px; width: 100%; margin-bottom: 10px; }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- Navbar -->
+    <!-- Nav -->
     <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center">
         <div>
             <h1 class="text-xl font-black neon-blue italic leading-none">QUEST 2A</h1>
-            <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-1">Created by TheUdonz</p>
+            <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Created by TheUdonz</p>
         </div>
         <div id="auth-ui">
-            <button id="btn-login" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">LOGIN WITH GOOGLE</button>
+            <button onclick="window.login()" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">LOGIN WITH GOOGLE</button>
         </div>
     </nav>
 
@@ -42,38 +41,42 @@
     </div>
 
     <!-- Tabs -->
-    <div class="max-w-xl mx-auto flex justify-around font-black text-[10px] tracking-widest text-gray-500 mb-6 border-b border-white/5">
-        <button id="tab-dash" class="pb-3 tab-active uppercase">Dashboard</button>
-        <button id="tab-log" class="pb-3 uppercase text-gray-500">Log</button>
-        <button id="tab-timer" class="pb-3 uppercase text-gray-500">Timer</button>
-        <button id="tab-leader" class="pb-3 uppercase text-gray-500">Ranking</button>
+    <div class="max-w-xl mx-auto flex justify-around font-black text-[11px] text-gray-500 mb-6 border-b border-white/5">
+        <button onclick="window.showPage('dash')" id="tab-dash" class="pb-3 tab-active">DASHBOARD</button>
+        <button onclick="window.showPage('log')" id="tab-log" class="pb-3">QUEST LOG</button>
+        <button onclick="window.showPage('timer')" id="tab-timer" class="pb-3">TIMER</button>
+        <button onclick="window.showPage('leader')" id="tab-leader" class="pb-3">RANKING</button>
     </div>
 
     <!-- Pages -->
     <main class="max-w-xl mx-auto px-4">
-        <div id="page-dash" class="space-y-4">
+        <!-- Dash -->
+        <div id="page-dash" class="page-content space-y-4">
             <div id="subject-list" class="grid grid-cols-2 gap-3"></div>
             <div class="glass p-5 rounded-3xl mt-4">
-                <div class="flex justify-between text-[10px] font-black text-yellow-500 mb-2 uppercase"><span>Century Gauge</span><span id="century-label">0/100H</span></div>
-                <div class="w-full bg-black h-3 rounded-full border border-white/5 overflow-hidden"><div id="century-bar" class="bg-yellow-500 h-full" style="width: 0%"></div></div>
+                <div class="flex justify-between text-[10px] font-black text-yellow-500 mb-2"><span>CENTURY GAUGE</span><span id="century-label">0/100H</span></div>
+                <div class="w-full bg-black h-3 rounded-full overflow-hidden"><div id="century-bar" class="bg-yellow-500 h-full" style="width: 0%"></div></div>
             </div>
-            <button id="btn-lazy" class="w-full py-5 bg-red-600/10 border border-red-600/30 rounded-2xl text-red-500 font-black italic">I'M LAZY TODAY...</button>
+            <button onclick="window.showLazy()" class="w-full py-5 bg-red-600/10 border border-red-600/30 rounded-2xl text-red-500 font-black italic">I'M LAZY TODAY...</button>
         </div>
 
-        <div id="page-log" class="hidden glass p-6 rounded-3xl">
-            <select id="input-subj"><option value="phy">Physics</option><option value="chem">Chemistry</option><option value="bio">Biology</option><option value="math">Mathematics</option></select>
+        <!-- Log -->
+        <div id="page-log" class="page-content hidden glass p-6 rounded-3xl">
+            <select id="input-subj"><option value="phy">Physics</option><option value="chem">Chemistry</option><option value="bio">Biology</option><option value="math">Math</option></select>
             <input type="number" id="input-xp" placeholder="XP Amount" value="100">
-            <button id="btn-earn-xp" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Earn XP</button>
+            <button onclick="window.addXP()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Complete Mission</button>
         </div>
 
-        <div id="page-timer" class="hidden text-center py-10 space-y-8">
+        <!-- Timer -->
+        <div id="page-timer" class="page-content hidden text-center py-10 space-y-8">
             <div id="timer-display" class="text-8xl font-black">25:00</div>
-            <button id="timer-btn" class="bg-white text-black font-black px-12 py-4 rounded-full text-xl shadow-xl">START</button>
+            <button id="timer-btn" onclick="window.toggleTimer()" class="bg-white text-black font-black px-12 py-4 rounded-full text-xl">START</button>
         </div>
 
-        <div id="page-leader" class="hidden glass p-6 rounded-3xl space-y-3 text-center">
-            <h2 class="text-xl font-black neon-blue italic mb-4 uppercase text-left">Top 10 Rankings</h2>
-            <div id="leader-list" class="space-y-2 text-gray-500 text-sm italic">Login to see global rankings</div>
+        <!-- Leaderboard -->
+        <div id="page-leader" class="page-content hidden glass p-6 rounded-3xl space-y-3">
+            <h2 class="text-xl font-black neon-blue italic mb-4 uppercase">Top 10 Legends</h2>
+            <div id="leader-list" class="space-y-2 text-xs italic text-gray-500">Login to see global rankings</div>
         </div>
     </main>
 
@@ -81,8 +84,8 @@
     <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-6 z-[100]">
         <div class="text-center max-w-sm">
             <h1 class="text-5xl font-black text-red-600 mb-6 italic">WAKE UP!</h1>
-            <p id="modal-quote" class="text-xl font-bold mb-10 italic">"..."</p>
-            <button id="btn-close-modal" class="bg-white text-black font-black px-10 py-3 rounded-full">OK, I'LL STUDY</button>
+            <p id="modal-quote" class="text-xl font-bold mb-10 italic"></p>
+            <button onclick="window.closeModal()" class="bg-white text-black font-black px-10 py-3 rounded-full">OK, I'LL STUDY</button>
         </div>
     </div>
 
@@ -91,7 +94,6 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Config ของพี่
         const firebaseConfig = {
             apiKey: "AIzaSyDbPJIQRlhm9eXRiP3qQwaBs8WqPMtD8Gc",
             authDomain: "alevel-6c91e.firebaseapp.com",
@@ -107,130 +109,92 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        let stats = JSON.parse(localStorage.getItem('quest2a_v5')) || {
+        let stats = JSON.parse(localStorage.getItem('quest2a_v6')) || {
             subjects: { phy: {lv:1, xp:0}, chem: {lv:1, xp:0}, bio: {lv:1, xp:0}, math: {lv:1, xp:0} },
-            totalHours: 0, userName: "Guest"
+            totalHours: 0
         };
 
-        let userObj = null;
+        let user = null;
 
-        // AUTH SYSTEM
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userObj = user;
-                document.getElementById('auth-ui').innerHTML = `<button id="btn-logout" class="text-[10px] text-red-500 font-bold uppercase tracking-widest">Logout: ${user.displayName}</button>`;
-                document.getElementById('btn-logout').onclick = () => signOut(auth).then(() => location.reload());
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (docSnap.exists()) stats = docSnap.data();
-                renderDashboard();
-            }
-        });
-
-        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-
-        // NAVIGATION SYSTEM
-        window.showPage = (p) => {
-            document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`page-${p}`).classList.remove('hidden');
-            document.querySelectorAll('.pb-3').forEach(t => t.classList.remove('tab-active', 'text-blue-400'));
-            document.querySelectorAll('.pb-3').forEach(t => t.classList.add('text-gray-500'));
-            document.getElementById(`tab-${p}`).classList.add('tab-active');
-            document.getElementById(`tab-${p}`).classList.remove('text-gray-500');
-            if(p === 'leader') fetchLeaderboard();
+        // บังคับให้ Function เป็น Global เพื่อให้ปุ่ม onclick หาเจอ
+        window.showPage = (id) => {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${id}`).classList.remove('hidden');
+            document.querySelectorAll('nav + div + div button').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById(`tab-${id}`).classList.add('tab-active');
+            if(id === 'leader') fetchLeaderboard();
         };
 
-        document.getElementById('tab-dash').onclick = () => window.showPage('dash');
-        document.getElementById('tab-log').onclick = () => window.showPage('log');
-        document.getElementById('tab-timer').onclick = () => window.showPage('timer');
-        document.getElementById('tab-leader').onclick = () => window.showPage('leader');
+        window.login = () => signInWithPopup(auth, provider);
+        window.logout = () => signOut(auth).then(() => location.reload());
 
-        // XP SYSTEM
-        window.addXP = async () => {
+        window.addXP = () => {
             const subj = document.getElementById('input-subj').value;
             const xp = parseInt(document.getElementById('input-xp').value) || 0;
-            if(xp <= 0) return;
             let s = stats.subjects[subj];
             s.xp += xp;
             while(s.xp >= s.lv * 100 && s.lv < 100) { s.xp -= s.lv * 100; s.lv++; }
             save();
-            alert(`Earned ${xp} XP for ${subj.toUpperCase()}!`);
         };
-        document.getElementById('btn-earn-xp').onclick = window.addXP;
+
+        window.showLazy = () => {
+            const qs = ["ข้อสอบไม่รอคนขี้เกียจ!", "คู่แข่งคุณกำลังอ่านอยู่!", "เลเวลสมองคุณเท่าไหร่แล้ว?"];
+            document.getElementById('modal-quote').innerText = qs[Math.floor(Math.random()*qs.length)];
+            document.getElementById('modal').classList.remove('hidden');
+        };
+        window.closeModal = () => document.getElementById('modal').classList.add('hidden');
 
         async function save() {
-            localStorage.setItem('quest2a_v5', JSON.stringify(stats));
-            renderDashboard();
-            if (userObj) {
+            localStorage.setItem('quest2a_v6', JSON.stringify(stats));
+            render();
+            if (user) {
                 const totalLv = Object.values(stats.subjects).reduce((a, b) => a + b.lv, 0);
-                await setDoc(doc(db, "users", userObj.uid), { ...stats, globalLevel: totalLv, userName: userObj.displayName, photo: userObj.photoURL });
+                await setDoc(doc(db, "users", user.uid), { 
+                    ...stats, 
+                    globalLevel: totalLv, 
+                    userName: user.displayName, 
+                    photo: user.photoURL 
+                });
             }
         }
 
-        function renderDashboard() {
-            const container = document.getElementById('subject-list');
-            container.innerHTML = '';
-            let totalLv = 0;
+        function render() {
+            const list = document.getElementById('subject-list');
+            list.innerHTML = '';
+            let total = 0;
             Object.keys(stats.subjects).forEach(k => {
                 const s = stats.subjects[k];
-                totalLv += s.lv;
-                container.innerHTML += `<div class="card-subj"><div class="flex justify-between text-[9px] mb-1 font-bold text-gray-500 uppercase"><span>${k}</span><span>LV. ${s.lv}</span></div><div class="w-full bg-black h-1 rounded-full overflow-hidden"><div class="bg-cyan-500 h-full" style="width: ${(s.xp/(s.lv*100))*100}%"></div></div></div>`;
+                total += s.lv;
+                list.innerHTML += `<div class="card-subj"><div class="flex justify-between text-[9px] mb-1 font-bold text-gray-500 uppercase"><span>${k}</span><span>LV. ${s.lv}</span></div><div class="w-full bg-black h-1 rounded-full overflow-hidden"><div class="bg-cyan-500 h-full progress-bar" style="width: ${(s.xp/(s.lv*100))*100}%"></div></div></div>`;
             });
-            document.getElementById('global-lv').innerText = totalLv;
-            document.getElementById('global-progress').style.width = `${(totalLv / 400) * 100}%`;
+            document.getElementById('global-lv').innerText = total;
+            document.getElementById('global-progress').style.width = `${(total/400)*100}%`;
             document.getElementById('century-bar').style.width = `${stats.totalHours}%`;
             document.getElementById('century-label').innerText = `${stats.totalHours.toFixed(1)}/100H`;
         }
 
         async function fetchLeaderboard() {
             const list = document.getElementById('leader-list');
-            try {
-                const q = query(collection(db, "users"), orderBy("globalLevel", "desc"), limit(10));
-                const snap = await getDocs(q);
-                list.innerHTML = '';
-                let i = 1;
-                snap.forEach(d => {
-                    const data = d.data();
-                    list.innerHTML += `<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5"><div class="flex items-center gap-3"><span class="text-gray-600 font-black">#${i++}</span><span class="text-xs font-bold">${data.userName || 'Anonymous'}</span></div><span class="neon-blue font-black">LV. ${data.globalLevel || 0}</span></div>`;
-                });
-                if(i === 1) list.innerHTML = "No rankings found.";
-            } catch (e) {
-                list.innerHTML = "Login to see the leaderboard.";
-            }
+            list.innerHTML = 'Loading...';
+            const q = query(collection(db, "users"), orderBy("globalLevel", "desc"), limit(10));
+            const snap = await getDocs(q);
+            list.innerHTML = '';
+            let i = 1;
+            snap.forEach(d => {
+                const data = d.data();
+                list.innerHTML += `<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5"><div class="flex items-center gap-3"><span class="text-gray-600 font-bold">#${i++}</span><span class="text-xs font-bold">${data.userName}</span></div><span class="neon-blue font-black text-lg">LV. ${data.globalLevel}</span></div>`;
+            });
         }
 
-        // TIMER
-        let timerInterval; let timeLeft = 25*60;
-        document.getElementById('timer-btn').onclick = () => {
-            if(timerInterval) { 
-                clearInterval(timerInterval); timerInterval = null; 
-                document.getElementById('timer-btn').innerText = "START"; 
-            } else {
+        // Timer
+        let timer; let timeLeft = 25 * 60;
+        window.toggleTimer = () => {
+            if(timer) { clearInterval(timer); timer = null; document.getElementById('timer-btn').innerText = "START"; }
+            else {
                 document.getElementById('timer-btn').innerText = "PAUSE";
-                timerInterval = setInterval(() => {
+                timer = setInterval(() => {
                     if(timeLeft > 0) {
                         timeLeft--;
                         document.getElementById('timer-display').innerText = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`;
                     } else {
-                        clearInterval(timerInterval); stats.totalHours += 0.42; save(); alert("Focus complete!"); timeLeft = 25*60;
-                    }
-                }, 1000);
-            }
-        };
-
-        // LAZY MODAL
-        document.getElementById('btn-lazy').onclick = () => {
-            const qs = [
-                "ถ้าแค่นี้ยังทำไม่ได้ ก็ถอยไปให้คนที่มีความพยายามเขาไปนั่งในมหาลัยแทนมึง!",
-                "คะแนนสอบไม่ได้แปรผันตามคำอธิษฐาน แต่มันแปรผันตามจำนวนข้อที่มึงทำ!",
-                "เลเวลในเกมอัปเอาๆ แต่เลเวลสมองยังอยู่ที่เดิม... เท่ตายละ!",
-                "ข้อสอบ A-Level ไม่เคยปรานีคนขี้เกียจ จำใส่หัวไว้!"
-            ];
-            document.getElementById('modal-quote').innerText = qs[Math.floor(Math.random()*qs.length)];
-            document.getElementById('modal').classList.remove('hidden');
-        };
-        document.getElementById('btn-close-modal').onclick = () => document.getElementById('modal').classList.add('hidden');
-
-        renderDashboard();
-    </script>
-</body>
-</html>
+                        clearInterval(timer); stats.totalHours += 0.42; save(); alert("Focus Done!");
